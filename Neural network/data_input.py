@@ -38,9 +38,13 @@ def manipulate_data(day, steps, screen_time, stress, migrane, rng=None):
     else:
         base_screen = rng.gauss(20, 15)  # late evening
 
-    # If migraine, people typically reduce screen exposure
-    if migrane:
-        base_screen *= 0.3
+    # If screen time is very high, trigger a migraine with some probability
+    if base_screen > 50:
+        migrane = 1
+
+    # if high stress from previous hour, increase migraine chance
+    if stress > 70:
+        migrane = 1
 
     screen_time = max(0.0, round(base_screen, 1))
     screen_time = min(screen_time, 60.0)
@@ -57,17 +61,19 @@ def manipulate_data(day, steps, screen_time, stress, migrane, rng=None):
 
 def main():
     random.seed(42)
-    with open('./phone_data', 'w', newline='') as file:
+    with open('./phone_data_long', 'w', newline='') as file:
         writer = csv.writer(file, delimiter=',')
 
         day = datetime.datetime(2025, 11, 1, 0, 0)
-        # initial placeholders (values will be overridden by manipulate_data)
-        steps = 0
-        screen_time = 0.0
-        stress = 0
-        migrane = 0
 
-        while str(day.date()) < '2025-12-1':
+
+        while str(day.date()) < '2027-11-1':
+            # initial placeholders (values will be overridden by manipulate_data)
+            steps = 0
+            screen_time = 0.0
+            stress = 0
+            migrane = 0
+
             row = manipulate_data(day, steps, screen_time, stress, migrane, rng=random)
             writer.writerow(row)
             print(row)
